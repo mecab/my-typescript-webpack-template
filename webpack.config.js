@@ -1,6 +1,7 @@
 var MiniCssExtractPlugin = require("mini-css-extract-plugin");
 var CopyWebpackPlugin = require('copy-webpack-plugin');
 var autoprefixer = require('autoprefixer');
+const path = require("path");
 
 module.exports = {
     mode: 'development',
@@ -13,8 +14,9 @@ module.exports = {
         filename: 'js/[name].js'
     },
     devServer: {
-        contentBase: './views',
-        publicPath: '/assets/'
+        static: [
+            { directory: path.join(__dirname, 'views'), },
+        ]
     },
     module: {
         rules: [
@@ -22,7 +24,7 @@ module.exports = {
                 test: /\.js?$/,
                 exclude: /(node_modules|bower_components)/,
                 loader: 'babel-loader',
-                query: {
+                options: {
                     presets: [['@babel/preset-env', {
                         targets: {
                             browsers: ['last 2 versions']
@@ -49,22 +51,36 @@ module.exports = {
             },
             {
                 test: /\.css$/,
-                loader: [ MiniCssExtractPlugin.loader, 'css-loader', 'postcss-loader' ]
+                use: [ MiniCssExtractPlugin.loader, 'css-loader', 'postcss-loader' ]
             },
             {
                 test: /\.scss$/,
-                loader: [ MiniCssExtractPlugin.loader, 'css-loader', 'postcss-loader', 'sass-loader' ]
+                use: [ MiniCssExtractPlugin.loader, 'css-loader', 'postcss-loader', 'sass-loader' ]
             },
+            // TODO file-loader and url-loader are depracated in favor of Webpack v5
             {
                 test: /\.(jpg|gif|png)$/,
-                loader: "file-loader?name=img/[name].[ext]"
+                loader: 'file-loader',
+                options: {
+                    name: 'img/[name].[ext]',
+                }
             },
-            { test: /\.woff(2)?(\?v=[0-9]\.[0-9]\.[0-9])?$/, loader: "url-loader?name=fonts/[name]-[hash].[ext]&limit=10000&minetype=application/font-woff" },
-            { test: /\.(otf|ttf|eot|svg)(\?v=[0-9]\.[0-9]\.[0-9])?$/, loader: "file-loader?name=fonts/[name]-[hash].[ext]" }
-            /*{
-             test: /\.(eot|svg|ttf|woff2?)(\?.*)?$/,
-             loader: "file?name=builtAssets/fonts/[name].[ext]"
-             }*/
+            { 
+                test: /\.woff(2)?(\?v=[0-9]\.[0-9]\.[0-9])?$/,
+                loader: 'url-loader',
+                options: {
+                    name: 'fonts/[name]-[hash].[ext]',
+                    limit: 10000,
+                    minetype: 'application/font-woff',
+                },
+            },
+            {
+                test: /\.(otf|ttf|eot|svg)(\?v=[0-9]\.[0-9]\.[0-9])?$/,
+                loader: 'file-loader',
+                options: {
+                    name: 'fonts/[name]-[hash].[ext]',
+                }
+            },
         ]
     },
     plugins: [
